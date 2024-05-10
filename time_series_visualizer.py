@@ -27,14 +27,28 @@ def draw_line_plot():
 
 def draw_bar_plot():
     # Copy and modify data for monthly bar plot
-    df_bar = None
+    df_hist = df.copy()
+    df_hist['year'] = df.index.year
+    df_hist['month'] = df.index.month
 
-    # Draw bar plot
+     # Group the DataFrame by year and month, 
+    # and calculate the average page views for each group
+    df_hist = df_hist.groupby(['year', 'month']).mean().reset_index()
 
+    # Pivot the DataFrame to have years as rows and months as columns
+    df_hist = df_hist.pivot(index='year', columns='month', values='value')
 
+    # Define month names for the legend
+    month_names =["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
+    # simpler way: using dataFrame.plot
+    # Plotting
+    ax = df_hist.plot(kind='bar', figsize=(15, 13))
+    ax.legend(title='Months', labels=month_names)
+    ax.set_xlabel('Years')
+    ax.set_ylabel('Average Page Views')
+    ax.set_title('Average Daily Page Views by Month')
 
-
-
+    fig = ax.get_figure()
     # Save image and return fig (don't change this part)
     fig.savefig('bar_plot.png')
     return fig
@@ -47,9 +61,20 @@ def draw_box_plot():
     df_box['month'] = [d.strftime('%b') for d in df_box.date]
 
     # Draw box plots (using Seaborn)
+    
+    month_names =["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+    fig, axes= plt.subplots(nrows=1, ncols=2, figsize=(28, 10))
 
+    sns.boxplot(data=df_box, x='year', y='value', ax=axes[0])
+    axes[0].set_title('Year-wise Box Plot (Trend)')
+    axes[0].set_xlabel('Year')
+    axes[0].set_ylabel('Page Views')
 
-
+    sns.boxplot(data=df_box, x='month', y='value', 
+                order=month_names, ax=axes[1])
+    axes[1].set_title('Month-wise Box Plot (Seasonality)')
+    axes[1].set_xlabel('Month')
+    axes[1].set_ylabel('Page Views')
 
 
     # Save image and return fig (don't change this part)
